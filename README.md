@@ -21,27 +21,17 @@ separate directories.
 
 ### Dependencies and requirements
 
-We run all experiments on a *DGX Station A100* running *Ubuntu 20.04*, with
-simultaneous multi-threading (SMT) enabled. To compile the source code, we use
-*GCC 9.4* and *OpenMP 5.0* with optimization level `-O3`. Executing the build
-and run script requires `bash`, and `tmux` or similar is needed to keep the
-experiment running in a separate terminal in the background. Additionally,
-*Node.js 18 LTS* is needed to process generated output into *CSV*, *Google*
-*sheets* is needed to generate charts and summarized CSVs, and *gnuplot 5.4* is
-needed to generate the plot from summarized CSVs. The specification our machine
-is as follows:
-
-```
-NVIDIA DGX Station A100
-Proc:  AMD EPYC 7742 64-Core CPU @ 2.25GHz (64 cores x 2)
-Cache: L1d+i: 4MB, L2: 32MB, L3: 256MB (shared), NUMA: 4 (internal)
-Mem:   512GB System Memory
-Disk:  Micron 7300 PRO 1.92TB NVMe; KIOXIA KCM6DRUL7T68 7.68TB NVMe
-Net:   Intel Ethernet Controller 10G X550T (10 Gbit/s)
-Disp:  4 x NVIDIA A100-SXM4-80GB; 12 x NVLink @ 25GBPS (Total 320GB)
-Disp:  ASPEED Graphics VGA controller; NVIDIA DGX Display (33MHz)
-OS:    Ubuntu 20.04.4 LTS (Focal Fossa, Linux 5.4.0-113-generic)
-```
+We run all experiments a server that has an AMD EPYC-7742 64-bit processor. This
+processor has a clock frequency of 2.25 GHz and 512 GB of DDR4 system memory.
+The CPU has 64 x86 cores and each core runs two hyper-threads. Each core has L1
+cache of 4 MB, L2 cache of 32 MB, and a shared L3 cache of 256 MB. The machine
+runs on *Ubuntu 20.04*. It is possible to run the experiment on any 64-bit
+system running a recent version of Linux by configuring the number of threads to
+use for the experiment. We use *GCC 9.4* and *OpenMP 5.0* to compile with
+optimization level 3 (`-O3`). Executing the build and run script requires
+`bash`. Additionally, *Node.js 18 LTS* is needed to process generated output
+into *CSV*, *Google* *sheets* is needed to generate charts and summarized CSVs,
+and *gnuplot 5.4* is needed to generate the plot from summarized CSVs.
 
 We use `13` graphs in *Matrix Market (.mtx)* file format from the *SuiteSparse*
 *Matrix Collection* as our input dataset. These must be placed in the `~/Data`
@@ -73,12 +63,19 @@ kmer_V1r.mtx
 ### Installation and deployment process
 
 Each experiment includes a `mains.sh` file which needs to be **executed** in
-order to run the experiment. To run an experiment, try `DOWNLOAD=0 ./mains.sh`
-from a `bash` shell. Please refer to any additional details in the `README.md`
-of each experiment (such as controlling the number of threads, if needed). Each
-experiment takes around 2 days to complete. Output logs are written to the
-`~/Logs` directory. These logs can be processed with the `process.js` script to
-generate a *CSV* file as follows:
+order to run the experiment. To run an experiment, try the following:
+
+```bash
+# Run experiment with a default of 64 threads
+$ DOWNLOAD=0 ./mains.sh
+
+# Run experiment with 32 threads
+$ DOWNLOAD=0 MAX_THREADS=32 ./mains.sh
+```
+
+Please refer to any additional details in the `README.md` of each experiment.
+Output logs are written to the `~/Logs` directory. These logs can be processed
+with the `process.js` script to generate a *CSV* file as follows:
 
 ```bash
 $ node process.js csv ~/Logs/"experiment".log "experiment".csv
@@ -102,19 +99,16 @@ The workflow of each experiment is as follows:
 
 1. Setup the necessary directories and download the input dataset with
    `setup.sh`.
-2. Use `tmux` to run the experiment in a separate terminal in the background.
-3. Run an experiment of choice with `DOWNLOAD=0 ./mains.sh` in respective
+2. Run an experiment of choice with `DOWNLOAD=0 ./mains.sh` in respective
    subdirectory.
-4. Output of the experiment is written to `~/Logs` directory.
-5. Process the output logs into CSV with `node process.js csv ~/Logs/"experiment".log "experiment".csv`.
-6. Import the CSV into the `data` sheet of the linked **sheets** document of the
+3. Output of the experiment is written to `~/Logs` directory.
+4. Process the output logs into CSV with `node process.js csv ~/Logs/"experiment".log "experiment".csv`.
+5. Import the CSV into the `data` sheet of the linked **sheets** document of the
    experiment.
-7. All the charts are automatically updated. See `"graph"` sheet for results on
+6. All the charts are automatically updated. See `"graph"` sheet for results on
    a specific input graph, or the `all` sheet for the average result on all
    input graphs.
-8. Use the `csv` sheet to retrieve summarized CSVs.
+7. Use the `csv` sheet to retrieve summarized CSVs.
 9. Use the summarized CSVs to generate plots using the `gnuplot` scripts in the
    `gnuplot-scripts-communities-cpu` subdirectory.
-10. Compare the generated plots with that of the paper.
-
-Each experiment takes around 2 days to complete.
+9. Compare the generated plots with that of the paper.
