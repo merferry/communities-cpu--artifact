@@ -11,7 +11,7 @@ set style textbox opaque noborder
 set xtics rotate by 45 right
 set logscale x 10
 set logscale y 10
-set format x "%g"
+set format x "10^{%L}"
 set grid   y
 set key above font ",12"
 set xlabel  '{/:Bold Batch fraction}'
@@ -34,38 +34,29 @@ set style line 14 linewidth 2 linetype 1 pointtype 2 dashtype 2
 
 ## Draw plot
 plot 'hybrid-am.csv' \
-       using 7:((0.001*$8  + 0.999*$11)/1000) title 'Dyn. Frontier Louvain'     linestyle 2 with linespoints, \
-    '' using 7:($13/1000)                     title 'Dyn. Frontier LPA'         linestyle 3 with linespoints, \
-    '' using 7:((0.002*$8  + 0.998*$15)/1000) title 'Dyn. Frontier Louvain-LPA' linestyle 4 with linespoints, \
-    '' using 7:19 title '' linestyle 12 with linespoints axes x1y2, \
-    '' using 7:21 title '' linestyle 13 with linespoints axes x1y2, \
-    '' using 7:23 title '' linestyle 14 with linespoints axes x1y2, \
-    '' using 7:((0.002*$8  + 0.998*$15)/1000):(sprintf("%.2f", (0.001*$8  + 0.999*$11)/(0.002*$8  + 0.998*$15))) with labels notitle offset character 0,character -1
+       using 4:((0.001*$5  + 0.999*$7 )/1000) title 'Dynamic Frontier Louvain'     linestyle 2 with linespoints, \
+    '' using 4:($8 /1000)                     title 'Dynamic Frontier LPA'         linestyle 3 with linespoints, \
+    '' using 4:((0.002*$5  + 0.998*$9 )/1000) title 'Dynamic Frontier Louvain-LPA' linestyle 4 with linespoints, \
+    '' using 4:12 title '' linestyle 12 with linespoints axes x1y2, \
+    '' using 4:13 title '' linestyle 13 with linespoints axes x1y2, \
+    '' using 4:14 title '' linestyle 14 with linespoints axes x1y2, \
+    '' using 4:((0.002*$5  + 0.998*$9 )/1000):(sprintf("%.2f", (0.001*$5  + 0.999*$7 )/(0.002*$5  + 0.998*$9 ))) with labels notitle offset character 0,character -1
 
 
 
 
 ## Columns in CSV file.
 # 01. graph
-# 02. order
-# 03. size
-# 04. batch_deletions_size
-# 05. batch_insertions_size
-# 06. batch_size
-# 07. batch_fraction
-# 08. ompstal-t
-# 09. ompstar-t
-# 10. ompstars-t
-# 11. ompfrol-t
-# 12. ompfror-t
-# 13. ompfrors-t
-# 14. ompfrolr-t
-# 15. ompfrolrs-t
-# 16. ompstal-m
-# 17. ompstar-m
-# 18. ompstars-m
-# 19. ompfrol-m
-# 20. ompfror-m
-# 21. ompfrors-m
-# 22. ompfrolr-m
-# 23. ompfrolrs-m
+# 02. batch_deletions_fraction
+# 03. batch_insertions_fraction
+# 04. batch_fraction
+# 05. lousta-t
+# 06. raksta-t
+# 07. loufro-t
+# 08. rakfro-t
+# 09. hybfro-t
+# 10. lousta-m
+# 11. raksta-m
+# 12. loufro-m
+# 13. rakfro-m
+# 14. hybfro-m

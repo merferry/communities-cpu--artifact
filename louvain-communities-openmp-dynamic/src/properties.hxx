@@ -15,7 +15,7 @@
 template <class G, class K>
 inline double edgeWeight(const G& x, K u) {
   double a = 0;
-  x.forEachEdgeValue(u, [&](auto w) { a += w; });
+  x.forEachEdge(u, [&](auto v, auto w) { a += w; });
   return a;
 }
 
@@ -43,4 +43,16 @@ inline double edgeWeightOmp(const G& x) {
     a += edgeWeight(x, u);
   }
   return a;
+}
+
+
+/**
+ * Find the outgoing degree of each vertex.
+ * @param a degrees of each vertex (output)
+ * @param x original graph
+ * @returns outgoing degree of each vertex
+ */
+template <class G, class K>
+inline void degreesW(vector<K>& a, const G& x) {
+  x.forEachVertexKey([&](auto u) { a[u] = x.degree(u); });
 }

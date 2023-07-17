@@ -7,7 +7,7 @@ printf "" > "$out"
 # Download program
 if [[ "$DOWNLOAD" != "0" ]]; then
   rm -rf $src
-  git clone https://github.com/puzzlef/$src
+  git clone https://github.com/ORG/$src
   cd $src
 fi
 
@@ -18,6 +18,7 @@ fi
 : "${REPEAT_METHOD:=1}"
 # Parameter sweep for batch (randomly generated)
 : "${BATCH_UNIT:=%}"
+: "${BATCH_LENGTH:=1}"
 : "${BATCH_DELETIONS_BEGIN:=0.00000005}"
 : "${BATCH_DELETIONS_END:=0.05}"
 : "${BATCH_DELETIONS_STEP:=*=10}"
@@ -36,6 +37,7 @@ DEFINES=(""
 "-DREPEAT_BATCH=$REPEAT_BATCH"
 "-DREPEAT_METHOD=$REPEAT_METHOD"
 "-DBATCH_UNIT=\"$BATCH_UNIT\""
+"-DBATCH_LENGTH=$BATCH_LENGTH"
 "-DBATCH_DELETIONS_BEGIN=$BATCH_DELETIONS_BEGIN"
 "-DBATCH_DELETIONS_END=$BATCH_DELETIONS_END"
 "-DBATCH_DELETIONS_STEP=$BATCH_DELETIONS_STEP"

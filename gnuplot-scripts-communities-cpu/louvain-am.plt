@@ -11,7 +11,7 @@ set style textbox opaque noborder
 set xtics rotate by 45 right
 set logscale x 10
 set logscale y 10
-set format x "%g"
+set format x "10^{%L}"
 set grid   y
 set key above font ",12"
 set xlabel  '{/:Bold Batch fraction}'
@@ -34,32 +34,29 @@ set style line 14 linewidth 2 linetype 1 pointtype 2 dashtype 2
 
 ## Draw plot
 plot 'louvain-am.csv' \
-       using 7:($8 /1000)                    title 'Static Louvain'           linestyle 1 with linespoints, \
-    '' using 7:($9 /1000)                    title 'Naive-dyn. Louvain'       linestyle 2 with linespoints, \
-    '' using 7:((0.001*$8 + 0.999*$10)/1000) title 'Dyn. Δ-screening Louvain' linestyle 3 with linespoints, \
-    '' using 7:((0.001*$8 + 0.999*$11)/1000) title 'Dyn. Frontier Louvain'    linestyle 4 with linespoints, \
-    '' using 7:12 title '' linestyle 11 with linespoints axes x1y2, \
-    '' using 7:13 title '' linestyle 12 with linespoints axes x1y2, \
-    '' using 7:14 title '' linestyle 13 with linespoints axes x1y2, \
-    '' using 7:15 title '' linestyle 14 with linespoints axes x1y2, \
-    '' using 7:((0.001*$8 + 0.999*$11)/1000):(sprintf("%.2f", $9/(0.001*$8 + 0.999*$11))) with labels notitle offset character 0,character -1
+       using 4:($5 /1000)                    title 'Static Louvain'              linestyle 1 with linespoints, \
+    '' using 4:($6 /1000)                    title 'Naive-dynamic Louvain'       linestyle 2 with linespoints, \
+    '' using 4:((0.001*$5 + 0.999*$7 )/1000) title 'Dynamic Δ-screening Louvain' linestyle 3 with linespoints, \
+    '' using 4:((0.001*$5 + 0.999*$8 )/1000) title 'Dynamic Frontier Louvain'    linestyle 4 with linespoints, \
+    '' using 4:9  title '' linestyle 11 with linespoints axes x1y2, \
+    '' using 4:10 title '' linestyle 12 with linespoints axes x1y2, \
+    '' using 4:11 title '' linestyle 13 with linespoints axes x1y2, \
+    '' using 4:12 title '' linestyle 14 with linespoints axes x1y2, \
+    '' using 4:((0.001*$5 + 0.999*$8 )/1000):(sprintf("%.2f", $6/(0.001*$5 + 0.999*$8 ))) with labels notitle offset character 0,character -1
 
 
 
 
 ## Columns in CSV file.
 # 01. graph
-# 02. order
-# 03. size
-# 04. batch_deletions_size
-# 05. batch_insertions_size
-# 06. batch_size
-# 07. batch_fraction
-# 08. ompsta-t
-# 09. ompnai-t
-# 10. ompdel-t
-# 11. ompfro-t
-# 12. ompsta-m
-# 13. ompnai-m
-# 14. ompdel-m
-# 15. ompfro-m
+# 02. batch_deletions_fraction
+# 03. batch_insertions_fraction
+# 04. batch_fraction
+# 05. lousta-t
+# 06. lounai-t
+# 07. loudel-t
+# 08. loufro-t
+# 09. lousta-m
+# 10. lounai-m
+# 11. loudel-m
+# 12. loufro-m

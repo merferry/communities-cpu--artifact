@@ -5,7 +5,7 @@ const path = require('path');
 const ROMPTH = /^OMP_NUM_THREADS=(\d+)/;
 const RGRAPH = /^Loading graph .*\/(.*?)\.mtx \.\.\./m;
 const RORDER = /^order: (\d+) size: (\d+) (?:\[\w+\] )?\{\}/m;
-const RRESLT = /^\{-(.+?)\/\+(.+?) batch, (.+?) threads\} -> \{(.+?)\/(.+?)ms, (.+?) iters, (.+?) passes, (.+?) modularity\} (\w+)/m;
+const RRESLT = /^\{-(.+?)\/\+(.+?) batchf, (.+?) threads\} -> \{(.+?)\/(.+?)ms, (.+?) iters, (.+?) passes, (.+?) modularity\} (\w+)/m;
 
 
 

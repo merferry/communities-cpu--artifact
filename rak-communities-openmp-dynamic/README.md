@@ -26,15 +26,15 @@ There are three different dynamic approaches (as with [sequential]) i am trying 
 - **Dyanmic Frontier**: We mark endpoints of each vertex as affected, and expand out iteratively.
 
 The input data used for below experiments is available from the [SuiteSparse Matrix Collection].
-The experiments were done with guidance from [Author-2] and
-[Author-3].
+The experiments were done with guidance from [Prof. AUTHOR-2] and
+[Prof. AUTHOR-3].
 
 [RAK]: https://arxiv.org/abs/0709.2938
 [community detection]: https://en.wikipedia.org/wiki/Community_search
-[sequential]: https://github.com/puzzlef/rak-communities-static-vs-dynamic
+[sequential]: https://github.com/ORG/rak-communities-static-vs-dynamic
 [Delta-screening]: https://ieeexplore.ieee.org/document/9384277
-[Author-3]: https://www.example.com
-[Author-2]: https://www.example.com
+[Prof. AUTHOR-3]: https://example.com
+[Prof. AUTHOR-2]: https://example.com
 [SuiteSparse Matrix Collection]: https://sparse.tamu.edu
 
 <br>
@@ -54,17 +54,22 @@ selection of each vertex (as endpoint) is *equally probable*.
 We make the following observations. Dynamic approaches are faster than static
 approaches on average. Among the dynamic approaches, *Dynamic Frontier* approach
 is the **fastest**, followed by *Naive-dynamic*, and finally *Dynamic*
-*Delta-screening* on average. All outputs are saved in a [gist]. Some [charts]
-are also included below, generated from [sheets].
+*Delta-screening* on average.
 
-[![](https://i.imgur.com/KGgvFnW.png)][sheetp]
-[![](https://i.imgur.com/g6nowdy.png)][sheetp]
-[![](https://i.imgur.com/ZR4y8dJ.png)][sheetp]
-[![](https://i.imgur.com/7ihG2kB.png)][sheetp]
-[![](https://i.imgur.com/BL361Nf.png)][sheetp]
-[![](https://i.imgur.com/Kv7fTQC.png)][sheetp]
+> See
+> [code](https://github.com/ORG/rak-communities-openmp-dynamic/tree/input-large),
+> [output](https://gist.github.com/wolfram77/ad7dd582d6e57c22c29ee4f24bc82797), or
+> [sheets].
 
-[input-large]: https://github.com/puzzlef/rak-communities-openmp-dynamic/tree/input-large
+[![](https://i.imgur.com/68Ox0yW.png)][sheets]
+[![](https://i.imgur.com/pyL1sZa.png)][sheets]
+[![](https://i.imgur.com/44xQ8vp.png)][sheets]
+[![](https://i.imgur.com/3snKKhY.png)][sheets]
+[![](https://i.imgur.com/qA0QZVl.png)][sheets]
+[![](https://i.imgur.com/i2yXEbn.png)][sheets]
+
+[input-large]: https://github.com/ORG/rak-communities-openmp-dynamic/tree/input-large
+[sheets]: https://docs.google.com/spreadsheets/d/1MG1NlpQ-etbwaENJwSjcq5eUTvsUphi2QfvYbjKnFss/edit?usp=sharing
 
 <br>
 
@@ -80,7 +85,7 @@ Results show that *Dynamic Delta-screening* marks `770x`, `210x`, `71x`, `19x`,
 `4.6x`, and `1.7x` the number of affected vertices as *Dynamic Frontier* based
 approach (*strict RAK*) on batch updates of size `10^-6 |E|` to `0.1 |E|`.
 
-[measure-affected]: https://github.com/puzzlef/rak-communities-openmp-dynamic/tree/measure-affected
+[measure-affected]: https://github.com/ORG/rak-communities-openmp-dynamic/tree/measure-affected
 
 <br>
 
@@ -98,7 +103,7 @@ Our results indicate that we need to do not need to rerun the static algorithm
 with *Dynamic Delta-screening* based *RAK* or with *Dynamic Frontier* based
 *RAK*.
 
-[multi-batch]: https://github.com/puzzlef/rak-communities-openmp-dynamic/tree/multi-batch
+[multi-batch]: https://github.com/ORG/rak-communities-openmp-dynamic/tree/multi-batch
 
 <br>
 <br>
@@ -136,9 +141,4 @@ $ DOWNLOAD=0 MAX_THREADS=4 ./mains.sh
 
 
 [![](https://i.imgur.com/u17N4wL.jpg)](https://www.youtube.com/watch?v=JZO-ZwkFoF8)<br>
-
-
-[gist]: https://www.example.com
-[charts]: https://imgur.com/a/we31l57
-[sheets]: https://docs.google.com/spreadsheets/d/1MG1NlpQ-etbwaENJwSjcq5eUTvsUphi2QfvYbjKnFss/edit?usp=sharing
-[sheetp]: https://docs.google.com/spreadsheets/d/e/2PACX-1vTIayId2dZvtmVorj6ESwA10p3pNHGF4znpk9CB1--DBsmwK14l12dFNt3LwXZNf1cCqgzf11BXoW3o/pubhtml
+[![ORG](https://img.shields.io/badge/org-ORG-green?logo=Org)](https://ORG.github.io)

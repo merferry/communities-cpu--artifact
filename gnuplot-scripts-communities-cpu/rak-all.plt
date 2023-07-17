@@ -40,10 +40,10 @@ files='indochina-2004 arabic-2005 uk-2005 webbase-2001 it-2004 sk-2005 com-LiveJ
 do for [i=1:words(files)] {
 set title word(files, i) offset 0,-0.8
 plot 'rak-all/'.word(files, i).'.csv' \
-       using 7:($9 /1000) title 'Static'           linestyle 1 with linespoints, \
-    '' using 7:($11/1000) title 'Naive-dyn.'       linestyle 2 with linespoints, \
-    '' using 7:($13/1000) title 'Dyn. Δ-screening' linestyle 3 with linespoints, \
-    '' using 7:($15/1000) title 'Dyn. Frontier'    linestyle 4 with linespoints,
+       using 4:($5 /1000) title 'Static'              linestyle 1 with linespoints, \
+    '' using 4:($6 /1000) title 'Naive-dynamic'       linestyle 2 with linespoints, \
+    '' using 4:($7 /1000) title 'Dynamic Δ-screening' linestyle 3 with linespoints, \
+    '' using 4:($8 /1000) title 'Dynamic Frontier'    linestyle 4 with linespoints,
 }
 unset multiplot
 
@@ -68,25 +68,14 @@ unset multiplot
 
 ## Columns in CSV file.
 # 01. graph
-# 02. order
-# 03. size
-# 04. batch_deletions_size
-# 05. batch_insertions_size
-# 06. batch_size
-# 07. batch_fraction
-# 08. ompsta-t
-# 09. ompstas-t
-# 10. ompnai-t
-# 11. ompnais-t
-# 12. ompdel-t
-# 13. ompdels-t
-# 14. ompfro-t
-# 15. ompfros-t
-# 16. ompsta-m
-# 17. ompstas-m
-# 18. ompnai-m
-# 19. ompnais-m
-# 20. ompdel-m
-# 21. ompdels-m
-# 22. ompfro-m
-# 23. ompfros-m
+# 02. batch_deletions_size
+# 03. batch_insertions_size
+# 04. batch_fraction
+# 05. raksta-t
+# 06. raknai-t
+# 07. rakdel-t
+# 08. rakfro-t
+# 09. raksta-m
+# 10. raknai-m
+# 11. rakdel-m
+# 12. rakfro-m

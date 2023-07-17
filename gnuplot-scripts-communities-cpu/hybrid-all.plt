@@ -40,9 +40,9 @@ files='indochina-2004 arabic-2005 uk-2005 webbase-2001 it-2004 sk-2005 com-LiveJ
 do for [i=1:words(files)] {
 set title word(files, i) offset 0,-0.8
 plot 'hybrid-all/'.word(files, i).'.csv' \
-       using 7:((0.001*$8  + 0.999*$11)/1000) title 'Dyn. Frontier Louvain'     linestyle 2 with linespoints, \
-    '' using 7:($13/1000)                     title 'Dyn. Frontier RAK'         linestyle 3 with linespoints, \
-    '' using 7:((0.002*$8  + 0.998*$15)/1000) title 'Dyn. Frontier Louvain-RAK' linestyle 4 with linespoints,
+       using 4:((0.001*$5  + 0.999*$7 )/1000) title 'Dynamic Frontier Louvain'     linestyle 2 with linespoints, \
+    '' using 4:($8 /1000)                     title 'Dynamic Frontier RAK'         linestyle 3 with linespoints, \
+    '' using 4:((0.002*$5  + 0.998*$9 )/1000) title 'Dynamic Frontier Louvain-RAK' linestyle 4 with linespoints,
 }
 unset multiplot
 
@@ -67,25 +67,16 @@ unset multiplot
 
 ## Columns in CSV file.
 # 01. graph
-# 02. order
-# 03. size
-# 04. batch_deletions_size
-# 05. batch_insertions_size
-# 06. batch_size
-# 07. batch_fraction
-# 08. ompstal-t
-# 09. ompstar-t
-# 10. ompstars-t
-# 11. ompfrol-t
-# 12. ompfror-t
-# 13. ompfrors-t
-# 14. ompfrolr-t
-# 15. ompfrolrs-t
-# 16. ompstal-m
-# 17. ompstar-m
-# 18. ompstars-m
-# 19. ompfrol-m
-# 20. ompfror-m
-# 21. ompfrors-m
-# 22. ompfrolr-m
-# 23. ompfrolrs-m
+# 02. batch_deletions_fraction
+# 03. batch_insertions_fraction
+# 04. batch_fraction
+# 05. lousta-t
+# 06. raksta-t
+# 07. loufro-t
+# 08. rakfro-t
+# 09. hybfro-t
+# 10. lousta-m
+# 11. raksta-m
+# 12. loufro-m
+# 13. rakfro-m
+# 14. hybfro-m

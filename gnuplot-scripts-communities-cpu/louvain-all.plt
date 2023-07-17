@@ -40,10 +40,10 @@ files='indochina-2004 arabic-2005 uk-2005 webbase-2001 it-2004 sk-2005 com-LiveJ
 do for [i=1:words(files)] {
 set title word(files, i) offset 0,-0.8
 plot 'louvain-all/'.word(files, i).'.csv' \
-       using 7:($8 /1000)                    title 'Static'           linestyle 1 with linespoints, \
-    '' using 7:($9 /1000)                    title 'Naive-dyn.'       linestyle 2 with linespoints, \
-    '' using 7:((0.001*$8 + 0.999*$10)/1000) title 'Dyn. Δ-screening' linestyle 3 with linespoints, \
-    '' using 7:((0.001*$8 + 0.999*$11)/1000) title 'Dyn. Frontier'    linestyle 4 with linespoints,
+       using 4:($5 /1000)                    title 'Static'              linestyle 1 with linespoints, \
+    '' using 4:($6 /1000)                    title 'Naive-dynamic'       linestyle 2 with linespoints, \
+    '' using 4:((0.001*$5 + 0.999*$7 )/1000) title 'Dynamic Δ-screening' linestyle 3 with linespoints, \
+    '' using 4:((0.001*$5 + 0.999*$8 )/1000) title 'Dynamic Frontier'    linestyle 4 with linespoints,
 }
 unset multiplot
 
@@ -68,17 +68,14 @@ unset multiplot
 
 ## Columns in CSV file.
 # 01. graph
-# 02. order
-# 03. size
-# 04. batch_deletions_size
-# 05. batch_insertions_size
-# 06. batch_size
-# 07. batch_fraction
-# 08. ompsta-t
-# 09. ompnai-t
-# 10. ompdel-t
-# 11. ompfro-t
-# 12. ompsta-m
-# 13. ompnai-m
-# 14. ompdel-m
-# 15. ompfro-m
+# 02. batch_deletions_fraction
+# 03. batch_insertions_fraction
+# 04. batch_fraction
+# 05. lousta-t
+# 06. lounai-t
+# 07. loudel-t
+# 08. loufro-t
+# 09. lousta-m
+# 10. lounai-m
+# 11. loudel-m
+# 12. loufro-m

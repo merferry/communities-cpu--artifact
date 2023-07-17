@@ -202,17 +202,150 @@ inline void rakClearScan(vector<K>& vcs, vector<W>& vcout) {
  * @param vcout total edge weight from vertex u to community C
  * @returns [best community, best edge weight to community]
  */
-template <bool STRICT=false, class G, class K, class W>
+template <class G, class K, class W>
 inline pair<K, W> rakChooseCommunity(const G& x, K u, const vector<K>& vcom, const vector<K>& vcs, const vector<W>& vcout) {
   K d = vcom[u];
   K cmax = K();
   W wmax = W();
-  for (K c : vcs) {
-    // Do some basic randomization if multiple labels have max weight.
-    if (vcout[c]>wmax || (!STRICT && vcout[c]==wmax && (c & 2))) { cmax = c; wmax = vcout[c]; }
-  }
+  for (K c : vcs)
+    if (vcout[c]>wmax) { cmax = c; wmax = vcout[c]; }
   return make_pair(cmax, wmax);
 }
+
+
+
+
+// RAK MOVE ITERATION
+// ------------------
+
+/**
+ * Move each vertex to its best community.
+ * @param vcom community each vertex belongs to (updated)
+ * @param vaff is vertex affected (updated)
+ * @param vcs communities vertex u is linked to (updated)
+ * @param vcout total edge weight from vertex u to community C (updated)
+ * @param x original graph
+ * @param fa is vertex allowed to be updated?
+ * @returns number of changed vertices
+ */
+template <class G, class K, class W, class B, class FA>
+inline size_t rakMoveIteration(vector<K>& vcom, vector<B>& vaff, vector<K>& vcs, vector<W>& vcout, const G& x, FA fa) {
+  size_t a = 0;
+  x.forEachVertexKey([&](auto u) {
+    if (!fa(u) || !vaff[u]) return;
+    K d = vcom[u];
+    rakClearScan(vcs, vcout);
+    rakScanCommunities(vcs, vcout, x, u, vcom);
+    auto [c, w] = rakChooseCommunity(x, u, vcom, vcs, vcout);
+    if (c && c!=d) { vcom[u] = c; ++a; x.forEachEdgeKey(u, [&](auto v) { vaff[v] = B(1); }); }
+    vaff[u] = B(0);
+  });
+  return a;
+}
+
+#ifdef OPENMP
+template <class G, class K, class W, class B, class FA>
+inline size_t rakMoveIterationOmp(vector<K>& vcom, vector<B>& vaff, vector<vector<K>*>& vcs, vector<vector<W>*>& vcout, const G& x, FA fa) {
+  size_t a = K();
+  size_t S = x.span();
+  #pragma omp parallel for schedule(dynamic, 2048) reduction(+:a)
+  for (K u=0; u<S; ++u) {
+    int t = omp_get_thread_num();
+    if (!x.hasVertex(u)) continue;
+    if (!fa(u) || !vaff[u]) continue;
+    K d = vcom[u];
+    rakClearScan(*vcs[t], *vcout[t]);
+    rakScanCommunities(*vcs[t], *vcout[t], x, u, vcom);
+    auto [c, w] = rakChooseCommunity(x, u, vcom, *vcs[t], *vcout[t]);
+    if (c && c!=d) { vcom[u] = c; ++a; x.forEachEdgeKey(u, [&](auto v) { vaff[v] = B(1); }); }
+    vaff[u] = B(0);
+  }
+  return a;
+}
+#endif
+
+
+
+
+// RAK
+// ---
+
+template <class FLAG=char, class G, class K, class FM, class FA>
+RakResult<K> rakSeq(const G& x, const vector<K>* q, const RakOptions& o, FM fm, FA fa) {
+  using V = typename G::edge_value_type;
+  using W = RAK_WEIGHT_TYPE;
+  using B = FLAG;
+  int l = 0;
+  size_t S = x.span();
+  size_t N = x.order();
+  vector<K> vcom(S), vcs;
+  vector<W> vcout(S);
+  vector<B> vaff(S);
+  float tm = 0;
+  float t  = measureDuration([&]() {
+    tm += measureDuration([&]() { fm(vaff); });
+    if (q) rakInitializeFrom(vcom, x, *q);
+    else   rakInitialize(vcom, x);
+    for (l=0; l<o.maxIterations;) {
+      size_t n = rakMoveIteration(vcom, vaff, vcs, vcout, x, fa); ++l;
+      if (double(n)/N <= o.tolerance) break;
+    }
+  }, o.repeat);
+  return {vcom, l, t, tm/o.repeat};
+}
+
+
+#ifdef OPENMP
+template <class FLAG=char, class G, class K, class FM, class FA>
+RakResult<K> rakOmp(const G& x, const vector<K>* q, const RakOptions& o, FM fm, FA fa) {
+  using V = typename G::edge_value_type;
+  using W = RAK_WEIGHT_TYPE;
+  using B = FLAG;
+  int l = 0;
+  int T = omp_get_max_threads();
+  size_t S = x.span();
+  size_t N = x.order();
+  vector<K> vcom(S);
+  vector<B> vaff(S);
+  vector<vector<K>*> vcs(T);
+  vector<vector<W>*> vcout(T);
+  rakAllocateHashtables(vcs, vcout, S);
+  float tm = 0;
+  float t  = measureDuration([&]() {
+    tm += measureDuration([&]() { fm(vaff); });
+    if (q) rakInitializeFromOmp(vcom, x, *q);
+    else   rakInitializeOmp(vcom, x);
+    for (l=0; l<o.maxIterations;) {
+      size_t n = rakMoveIterationOmp(vcom, vaff, vcs, vcout, x, fa); ++l;
+      if (double(n)/N <= o.tolerance) break;
+    }
+  }, o.repeat);
+  rakFreeHashtables(vcs, vcout);
+  return {vcom, l, t, tm/o.repeat};
+}
+#endif
+
+
+
+
+// RAK STATIC
+// ----------
+
+template <class FLAG=char, class G, class K>
+inline RakResult<K> rakStaticSeq(const G& x, const vector<K>* q=nullptr, const RakOptions& o={}) {
+  auto fm = [](auto& vaff) { fillValueU(vaff, FLAG(1)); };
+  auto fa = [](auto u) { return true; };
+  return rakSeq<FLAG>(x, q, o, fm, fa);
+}
+
+#ifdef OPENMP
+template <class FLAG=char, class G, class K>
+inline RakResult<K> rakStaticOmp(const G& x, const vector<K>* q=nullptr, const RakOptions& o={}) {
+  auto fm = [](auto& vaff) { fillValueU(vaff, FLAG(1)); };
+  auto fa = [](auto u) { return true; };
+  return rakOmp<FLAG>(x, q, o, fm, fa);
+}
+#endif
 
 
 
@@ -234,7 +367,7 @@ inline pair<K, W> rakChooseCommunity(const G& x, K u, const vector<K>& vcom, con
  * @param vcom community each vertex belongs to
  * @returns flags for each vertex marking whether it is affected
  */
-template <bool STRICT=false, class B, class G, class K, class V, class W>
+template <class B, class G, class K, class V, class W>
 inline void rakAffectedVerticesDeltaScreening(vector<K>& vcs, vector<W>& vcout, vector<B>& vertices, vector<B>& neighbors, vector<B>& communities, const G& x, const vector<tuple<K, K>>& deletions, const vector<tuple<K, K, V>>& insertions, const vector<K>& vcom) {
   fillValueU(vertices,    B());
   fillValueU(neighbors,   B());
@@ -254,7 +387,7 @@ inline void rakAffectedVerticesDeltaScreening(vector<K>& vcs, vector<W>& vcout, 
       if (vcom[u] == vcom[v]) continue;
       rakScanCommunity(vcs, vcout, u, v, w, vcom);
     }
-    auto [c, w] = rakChooseCommunity<STRICT>(x, u, vcom, vcs, vcout);
+    auto [c, w] = rakChooseCommunity(x, u, vcom, vcs, vcout);
     if (w<=0 || c==vcom[u]) continue;
     vertices[u]  = 1;
     neighbors[u] = 1;
@@ -268,7 +401,7 @@ inline void rakAffectedVerticesDeltaScreening(vector<K>& vcs, vector<W>& vcout, 
 
 
 #ifdef OPENMP
-template <bool STRICT=false, class B, class G, class K, class V, class W>
+template <class B, class G, class K, class V, class W>
 inline void rakAffectedVerticesDeltaScreeningOmp(vector<vector<K>*>& vcs, vector<vector<W>*>& vcout, vector<B>& vertices, vector<B>& neighbors, vector<B>& communities, const G& x, const vector<tuple<K, K>>& deletions, const vector<tuple<K, K, V>>& insertions, const vector<K>& vcom) {
   size_t S = x.span();
   size_t D = deletions.size();
@@ -301,7 +434,7 @@ inline void rakAffectedVerticesDeltaScreeningOmp(vector<vector<K>*>& vcs, vector
         if (vcom[u] == vcom[v]) continue;
         rakScanCommunity(*vcs[t], *vcout[t], u, v, w, vcom);
       }
-      auto [c, w] = rakChooseCommunity<STRICT>(x, u, vcom, *vcs[t], *vcout[t]);
+      auto [c, w] = rakChooseCommunity(x, u, vcom, *vcs[t], *vcout[t]);
       if (w<=0 || c==vcom[u]) continue;
       vertices[u]  = 1;
       neighbors[u] = 1;
@@ -378,140 +511,10 @@ inline void rakAffectedVerticesFrontierOmp(vector<B>& vertices, const G& x, cons
 
 
 
-// RAK MOVE ITERATION
-// ------------------
-
-/**
- * Move each vertex to its best community.
- * @param vcs communities vertex u is linked to (updated)
- * @param vcout total edge weight from vertex u to community C (updated)
- * @param vcom community each vertex belongs to (updated)
- * @param x original graph
- * @param vdom community each vertex belonged to
- * @returns number of changed vertices
- */
-template <bool STRICT=false, class G, class K, class W, class FA, class FP>
-inline size_t rakMoveIteration(vector<K>& vcs, vector<W>& vcout, vector<K>& vcom, const G& x, FA fa, FP fp) {
-  size_t a = 0;
-  x.forEachVertexKey([&](auto u) {
-    if (!fa(u)) return;
-    K d = vcom[u];
-    rakClearScan(vcs, vcout);
-    rakScanCommunities(vcs, vcout, x, u, vcom);
-    auto [c, w] = rakChooseCommunity<STRICT>(x, u, vcom, vcs, vcout);
-    if (c && c!=d) { vcom[u] = c; ++a; fp(u); }
-  });
-  return a;
-}
-
-#ifdef OPENMP
-template <bool STRICT=false, class G, class K, class W, class FA, class FP>
-inline size_t rakMoveIterationOmp(vector<vector<K>*>& vcs, vector<vector<W>*>& vcout, vector<K>& vcom, const G& x, FA fa, FP fp) {
-  size_t a = K();
-  size_t S = x.span();
-  #pragma omp parallel for schedule(auto) reduction(+:a)
-  for (K u=0; u<S; ++u) {
-    int t = omp_get_thread_num();
-    if (!x.hasVertex(u)) continue;
-    if (!fa(u)) continue;
-    K d = vcom[u];
-    rakClearScan(*vcs[t], *vcout[t]);
-    rakScanCommunities(*vcs[t], *vcout[t], x, u, vcom);
-    auto [c, w] = rakChooseCommunity<STRICT>(x, u, vcom, *vcs[t], *vcout[t]);
-    if (c && c!=d) { vcom[u] = c; ++a; fp(u); }
-  }
-  return a;
-}
-#endif
-
-
-
-
-// RAK
-// ---
-
-template <bool STRICT=false, class G, class K, class FM, class FA, class FP>
-RakResult<K> rakSeq(const G& x, const vector<K>* q, const RakOptions& o, FM fm, FA fa, FP fp) {
-  using V = typename G::edge_value_type;
-  using W = RAK_WEIGHT_TYPE;
-  int l = 0;
-  size_t S = x.span();
-  size_t N = x.order();
-  vector<K> vcom(S), vcs;
-  vector<W> vcout(S);
-  float tm = 0;
-  float t  = measureDuration([&]() {
-    tm += measureDuration(fm);
-    if (q) rakInitializeFrom(vcom, x, *q);
-    else   rakInitialize(vcom, x);
-    for (l=0; l<o.maxIterations;) {
-      size_t n = rakMoveIteration<STRICT>(vcs, vcout, vcom, x, fa, fp); ++l;
-      if (double(n)/N <= o.tolerance) break;
-    }
-  }, o.repeat);
-  return {vcom, l, t, tm/o.repeat};
-}
-
-
-#ifdef OPENMP
-template <bool STRICT=false, class G, class K, class FM, class FA, class FP>
-RakResult<K> rakOmp(const G& x, const vector<K>* q, const RakOptions& o, FM fm, FA fa, FP fp) {
-  using V = typename G::edge_value_type;
-  using W = RAK_WEIGHT_TYPE;
-  int l = 0;
-  int T = omp_get_max_threads();
-  size_t S = x.span();
-  size_t N = x.order();
-  vector<K> vcom(S);
-  vector<vector<K>*> vcs(T);
-  vector<vector<W>*> vcout(T);
-  rakAllocateHashtables(vcs, vcout, S);
-  float tm = 0;
-  float t  = measureDuration([&]() {
-    tm += measureDuration(fm);
-    if (q) rakInitializeFromOmp(vcom, x, *q);
-    else   rakInitializeOmp(vcom, x);
-    for (l=0; l<o.maxIterations;) {
-      size_t n = rakMoveIterationOmp<STRICT>(vcs, vcout, vcom, x, fa, fp); ++l;
-      if (double(n)/N <= o.tolerance) break;
-    }
-  }, o.repeat);
-  rakFreeHashtables(vcs, vcout);
-  return {vcom, l, t, tm/o.repeat};
-}
-#endif
-
-
-
-
-// RAK STATIC
-// ----------
-
-template <bool STRICT=false, class G, class K>
-inline RakResult<K> rakStaticSeq(const G& x, const vector<K>* q=nullptr, const RakOptions& o={}) {
-  auto fm = []() {};
-  auto fa = [](auto u) { return u; };
-  auto fp = [](auto u) {};
-  return rakSeq<STRICT>(x, q, o, fm, fa, fp);
-}
-
-#ifdef OPENMP
-template <bool STRICT=false, class G, class K>
-inline RakResult<K> rakStaticOmp(const G& x, const vector<K>* q=nullptr, const RakOptions& o={}) {
-  auto fm = []() {};
-  auto fa = [](auto u) { return u; };
-  auto fp = [](auto u) {};
-  return rakOmp<STRICT>(x, q, o, fm, fa, fp);
-}
-#endif
-
-
-
-
 // RAK DYNAMIC DELTA-SCREENING
 // ---------------------------
 
-template <bool STRICT=false, class FLAG=char, class G, class K, class V>
+template <class FLAG=char, class G, class K, class V>
 inline RakResult<K> rakDynamicDeltaScreeningSeq(const G& x, const vector<tuple<K, K>>& deletions, const vector<tuple<K, K, V>>& insertions, const vector<K>* q, const RakOptions& o={}) {
   using  W = RAK_WEIGHT_TYPE;
   using  B = FLAG;
@@ -519,15 +522,18 @@ inline RakResult<K> rakDynamicDeltaScreeningSeq(const G& x, const vector<tuple<K
   const vector<K>& vcom = *q;
   vector<K> vcs; vector<W> vcout(S);
   vector<B> vertices(S), neighbors(S), communities(S);
-  auto fm = [&]() { rakAffectedVerticesDeltaScreening<STRICT>(vcs, vcout, vertices, neighbors, communities, x, deletions, insertions, vcom); vcs.clear(); vcout.clear(); };
+  auto fm = [&](auto& vaff) {
+    rakAffectedVerticesDeltaScreening(vcs, vcout, vertices, neighbors, communities, x, deletions, insertions, vcom);
+    copyValuesW(vaff, vertices);
+    vcs.clear(); vcout.clear();
+  };
   auto fa = [&](auto u) { return vertices[u]==B(1); };
-  auto fp = [](auto u) {};
-  return rakSeq<STRICT>(x, q, o, fm, fa, fp);
+  return rakSeq<FLAG>(x, q, o, fm, fa);
 }
 
 
 #ifdef OPENMP
-template <bool STRICT=false, class FLAG=char, class G, class K, class V>
+template <class FLAG=char, class G, class K, class V>
 inline RakResult<K> rakDynamicDeltaScreeningOmp(const G& x, const vector<tuple<K, K>>& deletions, const vector<tuple<K, K, V>>& insertions, const vector<K>* q, const RakOptions& o={}) {
   using  W = RAK_WEIGHT_TYPE;
   using  B = FLAG;
@@ -538,10 +544,13 @@ inline RakResult<K> rakDynamicDeltaScreeningOmp(const G& x, const vector<tuple<K
   vector<vector<K>*> vcs(T);
   vector<vector<W>*> vcout(T);
   rakAllocateHashtables(vcs, vcout, S);
-  auto fm = [&]() { rakAffectedVerticesDeltaScreeningOmp<STRICT>(vcs, vcout, vertices, neighbors, communities, x, deletions, insertions, vcom); rakFreeHashtables(vcs, vcout); };
+  auto fm = [&](auto& vaff) {
+    rakAffectedVerticesDeltaScreeningOmp(vcs, vcout, vertices, neighbors, communities, x, deletions, insertions, vcom);
+    copyValuesOmpW(vaff, vertices);
+    rakFreeHashtables(vcs, vcout);
+  };
   auto fa = [&](auto u) { return vertices[u]==B(1); };
-  auto fp = [](auto u) {};
-  return rakOmp<STRICT>(x, q, o, fm, fa, fp);
+  return rakOmp<FLAG>(x, q, o, fm, fa);
 }
 #endif
 
@@ -551,29 +560,23 @@ inline RakResult<K> rakDynamicDeltaScreeningOmp(const G& x, const vector<tuple<K
 // RAK DYNAMIC FRONTIER
 // --------------------
 
-template <bool STRICT=false, class FLAG=char, class G, class K, class V>
+template <class FLAG=char, class G, class K, class V>
 inline RakResult<K> rakDynamicFrontierSeq(const G& x, const vector<tuple<K, K>>& deletions, const vector<tuple<K, K, V>>& insertions, const vector<K>* q, const RakOptions& o={}) {
   using  B = FLAG;
-  size_t S = x.span();
   const vector<K>& vcom = *q;
-  vector<B> vertices(S);
-  auto fm = [&]() { rakAffectedVerticesFrontier(vertices, x, deletions, insertions, vcom); };
-  auto fa = [&](auto u) { return vertices[u]==B(1); };
-  auto fp = [&](auto u) { x.forEachEdgeKey(u, [&](auto v) { vertices[v] = 1; }); };
-  return rakSeq<STRICT>(x, q, o, fm, fa, fp);
+  auto fm = [&](auto& vaff) { rakAffectedVerticesFrontier(vaff, x, deletions, insertions, vcom); };
+  auto fa = [](auto u) { return true; };
+  return rakSeq<FLAG>(x, q, o, fm, fa);
 }
 
 
 #ifdef OPENMP
-template <bool STRICT=false, class FLAG=char, class G, class K, class V>
+template <class FLAG=char, class G, class K, class V>
 inline RakResult<K> rakDynamicFrontierOmp(const G& x, const vector<tuple<K, K>>& deletions, const vector<tuple<K, K, V>>& insertions, const vector<K>* q, const RakOptions& o={}) {
   using  B = FLAG;
-  size_t S = x.span();
   const vector<K>& vcom = *q;
-  vector<B> vertices(S);
-  auto fm = [&]() { rakAffectedVerticesFrontier(vertices, x, deletions, insertions, vcom); };
-  auto fa = [&](auto u) { return vertices[u]==B(1); };
-  auto fp = [&](auto u) { x.forEachEdgeKey(u, [&](auto v) { vertices[v] = 1; }); };
-  return rakOmp<STRICT>(x, q, o, fm, fa, fp);
+  auto fm = [&](auto& vaff) { rakAffectedVerticesFrontier(vaff, x, deletions, insertions, vcom); };
+  auto fa = [](auto u) { return true; };
+  return rakOmp<FLAG>(x, q, o, fm, fa);
 }
 #endif

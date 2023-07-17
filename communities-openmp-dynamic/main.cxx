@@ -36,12 +36,12 @@ using namespace std;
 template <class G, class K>
 inline double getModularity(const G& x, const LouvainResult<K>& a, double M) {
   auto fc = [&](auto u) { return a.membership[u]; };
-  return modularityByOmp(x, fc, M, 1.0);
+  return modularityBy(x, fc, M, 1.0);
 }
 template <class G, class K>
 inline double getModularity(const G& x, const RakResult<K>& a, double M) {
   auto fc = [&](auto u) { return a.membership[u]; };
-  return modularityByOmp(x, fc, M, 1.0);
+  return modularityBy(x, fc, M, 1.0);
 }
 
 
@@ -61,6 +61,7 @@ inline auto addRandomEdges(G& a, R& rnd, size_t batchSize, size_t i, size_t n) {
     a.addEdge(v, u, w);
     insertions.push_back(make_tuple(u, v, w));
     insertions.push_back(make_tuple(v, u, w));
+    return true;
   };
   for (size_t l=0; l<batchSize; ++l)
     retry([&]() { return addRandomEdge(a, rnd, i, n, V(1), fe); }, retries);
@@ -79,6 +80,7 @@ auto removeRandomEdges(G& a, R& rnd, size_t batchSize, size_t i, size_t n) {
     a.removeEdge(v, u);
     deletions.push_back(make_tuple(u, v));
     deletions.push_back(make_tuple(v, u));
+    return true;
   };
   for (size_t l=0; l<batchSize; ++l)
     retry([&]() { return removeRandomEdge(a, rnd, i, n, fe); }, retries);
@@ -99,9 +101,11 @@ inline void runAbsoluteBatches(const G& x, R& rnd, F fn) {
   for (int epoch=0;; ++epoch) {
     for (int r=0; r<REPEAT_BATCH; ++r) {
       auto y  = duplicate(x);
+      for (int sequence=0; sequence<BATCH_LENGTH; ++sequence) {
       auto deletions  = removeRandomEdges(y, rnd, d, 1, x.span()-1);
       auto insertions = addRandomEdges   (y, rnd, i, 1, x.span()-1);
-      fn(y, deletions, insertions, epoch);
+        fn(y, d, deletions, i, insertions, sequence, epoch);
+      }
     }
     if (d>=BATCH_DELETIONS_END && i>=BATCH_INSERTIONS_END) break;
     d BATCH_DELETIONS_STEP;
@@ -119,9 +123,11 @@ inline void runRelativeBatches(const G& x, R& rnd, F fn) {
   for (int epoch=0;; ++epoch) {
     for (int r=0; r<REPEAT_BATCH; ++r) {
       auto y  = duplicate(x);
+      for (int sequence=0; sequence<BATCH_LENGTH; ++sequence) {
       auto deletions  = removeRandomEdges(y, rnd, size_t(d * x.size()/2), 1, x.span()-1);
       auto insertions = addRandomEdges   (y, rnd, size_t(i * x.size()/2), 1, x.span()-1);
-      fn(y, deletions, insertions, epoch);
+        fn(y, d, deletions, i, insertions, sequence, epoch);
+      }
     }
     if (d>=BATCH_DELETIONS_END && i>=BATCH_INSERTIONS_END) break;
     d BATCH_DELETIONS_STEP;
@@ -176,26 +182,28 @@ void runExperiment(const G& x) {
   int repeat  = REPEAT_METHOD;
   int retries = 5;
   vector<K> *init = nullptr;
+  double M = edgeWeightOmp(x)/2;
+  // Follow a specific result logging format, which can be easily parsed later.
+  auto glog = [&](const auto& ans, const char *technique, int numThreads, const auto& y, auto M, auto deletionsf, auto insertionsf) {
+    printf(
+      "{-%.3e/+%.3e batchf, %03d threads} -> "
+      "{%09.1f/%09.1fms, %04d iters, %03d passes, %01.9f modularity} %s\n",
+      double(deletionsf), double(insertionsf), numThreads,
+      ans.preprocessingTime, ans.time, ans.iterations, ans.passes, getModularity(y, ans, M), technique
+    );
+  };
   // Get community memberships on original graph (static).
   auto b0 = louvainStaticOmp(x, init);
-  auto e0 = rakStaticOmp<false>(x, init);
-  auto f0 = rakStaticOmp<true> (x, init);
+  glog(b0, "louvainStaticOmpOriginal", MAX_THREADS, x, M, 0.0, 0.0);
+  auto f0 = rakStaticOmp(x, init);
+  glog(f0, "rakStaticOmpOriginal", MAX_THREADS, x, M, 0.0, 0.0);
   // Get community memberships on updated graph (dynamic).
-  runBatches(x, rnd, [&](const auto& y, const auto& deletions, const auto& insertions, int epoch) {
+  runBatches(x, rnd, [&](const auto& y, auto deletionsf, const auto& deletions, auto insertionsf, const auto& insertions, int sequence, int epoch) {
     double M = edgeWeightOmp(y)/2;
-    // Follow a specific result logging format, which can be easily parsed later.
-    auto glog = [&](const auto& ans, const char *technique, int numThreads) {
-      LOG(
-        "{-%.3e/+%.3e batch, %03d threads} -> "
-        "{%09.1f/%09.1fms, %04d iters, %03d passes, %01.9f modularity} %s\n",
-        double(deletions.size()), double(insertions.size()), numThreads,
-        ans.preprocessingTime, ans.time, ans.iterations, ans.passes, getModularity(y, ans, M), technique
-      );
-    };
     // Adjust number of threads.
     runThreads(epoch, [&](int numThreads) {
       auto flog = [&](const auto& ans, const char *technique) {
-        glog(ans, technique, numThreads);
+        glog(ans, technique, numThreads, y, M, deletionsf, insertionsf);
       };
       // Find static Louvain.
       auto b1 = louvainStaticOmp(y, init, {repeat});
@@ -203,24 +211,15 @@ void runExperiment(const G& x) {
       // Find frontier based dynamic Louvain.
       auto b2 = louvainDynamicFrontierOmp(y, deletions, insertions, &b0.membership, {repeat});
       flog(b2, "louvainDynamicFrontierOmp");
-      // Find static RAK (non-strict).
-      auto e1 = rakStaticOmp<false>(y, init, {repeat});
-      flog(e1, "rakStaticOmp");
       // Find static RAK (strict).
-      auto f1 = rakStaticOmp<true> (y, init, {repeat});
-      flog(f1, "rakStaticOmpStrict");
-      // Find frontier based dynamic RAK (non-strict).
-      auto e2 = rakDynamicFrontierOmp<false>(y, deletions, insertions, &e0.membership, {repeat});
-      flog(e2, "rakDynamicFrontierOmp");
+      auto f1 = rakStaticOmp(y, init, {repeat});
+      flog(f1, "rakStaticOmp");
       // Find frontier based dynamic RAK (strict).
-      auto f2 = rakDynamicFrontierOmp<true> (y, deletions, insertions, &f0.membership, {repeat});
-      flog(f2, "rakDynamicFrontierOmpStrict");
-      // Find frontier based dynamic Hybrid Louvain-RAK (non-strict).
-      auto e3 = rakDynamicFrontierOmp<false>(y, deletions, insertions, &b0.membership, {repeat});
-      flog(e3, "louvainRakDynamicFrontierOmp");
+      auto f2 = rakDynamicFrontierOmp(y, deletions, insertions, &f0.membership, {repeat});
+      flog(f2, "rakDynamicFrontierOmp");
       // Find frontier based dynamic Hybrid Louvain-RAK (strict).
-      auto f3 = rakDynamicFrontierOmp<true> (y, deletions, insertions, &b0.membership, {repeat});
-      flog(f3, "louvainRakDynamicFrontierOmpStrict");
+      auto f3 = rakDynamicFrontierOmp(y, deletions, insertions, &b0.membership, {repeat});
+      flog(f3, "louvainRakDynamicFrontierOmp");
     });
   });
 }
@@ -236,7 +235,7 @@ int main(int argc, char **argv) {
   omp_set_num_threads(MAX_THREADS);
   LOG("OMP_NUM_THREADS=%d\n", MAX_THREADS);
   LOG("Loading graph %s ...\n", file);
-  OutDiGraph<K, None, V> x;
+  DiGraph<K, None, V> x;
   readMtxOmpW(x, file, weighted); LOG(""); println(x);
   if (!symmetric) { x = symmetricizeOmp(x); LOG(""); print(x); printf(" (symmetricize)\n"); }
   runExperiment(x);

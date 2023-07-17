@@ -1,0 +1,38 @@
+1,adjust-schedule,static,"5,534.0 ms",0.9309,0.9390,0.9926
+1,adjust-schedule,dynamic,"5,479.5 ms",0.9341,0.9297,0.9960
+1,adjust-schedule,guided,"5,707.3 ms",0.9375,0.9684,0.9996
+1,adjust-schedule,auto,"5,893.7 ms",0.9379,1.0000,1.0000
+,,,,,,
+2,adjust-max-iterations,10,"2,571.8 ms",0.9336,0.9627,0.9995
+2,adjust-max-iterations,20,"2,317.1 ms",0.9339,0.8674,0.9999
+2,adjust-max-iterations,50,"2,568.2 ms",0.9338,0.9614,0.9998
+2,adjust-max-iterations,100,"2,671.3 ms",0.9340,1.0000,1.0000
+,,,,,,
+3,adjust-tolerance-drop,1,"2,233.7 ms",0.9293,1.0000,0.9986
+3,adjust-tolerance-drop,10,"2,147.6 ms",0.9304,0.9615,0.9998
+3,adjust-tolerance-drop,100,"2,202.3 ms",0.9302,0.9860,0.9996
+3,adjust-tolerance-drop,1000,"2,227.1 ms",0.9306,0.9970,1.0000
+,,,,,,
+4,adjust-tolerance,10^{-2},"5,916.9 ms",0.9386,0.8602,0.9995
+4,adjust-tolerance,10^{-4},"6,594.0 ms",0.9391,0.9586,1.0000
+4,adjust-tolerance,10^{-6},"6,878.6 ms",0.9390,1.0000,0.9999
+,,,,,,
+5,adjust-aggregation-tolerance,disabled,"2,718.0 ms",0.9339,1.0000,0.9999
+5,adjust-aggregation-tolerance,0.9,"2,433.5 ms",0.9339,0.8954,1.0000
+5,adjust-aggregation-tolerance,0.8,"2,338.7 ms",0.9337,0.8605,0.9998
+5,adjust-aggregation-tolerance,0.7,"2,404.9 ms",0.9332,0.8848,0.9992
+5,adjust-aggregation-tolerance,0.6,"2,409.2 ms",0.9336,0.8864,0.9997
+,,,,,,
+6,adjust-pruning,disabled,"6,964.4 ms",0.9384,1.0000,1.0000
+6,adjust-pruning,enabled,"6,170.4 ms",0.9384,0.8860,1.0000
+,,,,,,
+7,approach-communities-vector2d,csr,"6,180.8 ms",0.9386,0.4591,1.0000
+7,approach-communities-vector2d,vector2d,"13,462.6 ms",0.9382,1.0000,0.9996
+,,,,,,
+8,approach-aggregate-csr,csr,"2,693.4 ms",0.9342,0.4615,0.9953
+8,approach-aggregate-csr,vector2d,"5,836.4 ms",0.9386,1.0000,1.0000
+,,,,,,
+9,adjust-hashtable,far-kv,"5,699.5 ms",0.9387,0.2258,1.0000
+9,adjust-hashtable,close-kv,"7,495.5 ms",0.9384,0.2970,0.9996
+9,adjust-hashtable,map,"25,239.1 ms",0.9386,1.0000,0.9999
+,,,,,,

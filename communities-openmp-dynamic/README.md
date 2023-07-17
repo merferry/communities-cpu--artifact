@@ -1,12 +1,12 @@
 Comparing dynamic approaches of various OpenMP-based algorithms for [community detection].
 
 The input data used for below experiments is available from the [SuiteSparse Matrix Collection].
-The experiments were done with guidance from [Author-2] and
-[Author-3].
+The experiments were done with guidance from [Prof. AUTHOR-2] and
+[Prof. AUTHOR-3].
 
 [community detection]: https://en.wikipedia.org/wiki/Community_search
-[Author-3]: https://www.example.com
-[Author-2]: https://www.example.com
+[Prof. AUTHOR-3]: https://example.com
+[Prof. AUTHOR-2]: https://example.com
 [SuiteSparse Matrix Collection]: https://sparse.tamu.edu
 
 <br>
@@ -31,17 +31,22 @@ followed by *Dynamic RAK* approaches on average, which is then followed by
 *Static RAK*. In terms of time, *Dynamic Frontier* based *Hybrid Louvain-RAK* is
 the fastest, followed by *Dynamic Frontier* based *RAK* and  other dynamic RAK
 approaches, which is then followed by *Dynamic Frontier* based *Louvain* on
-average. All outputs are saved in a [gist]. Some [charts] are also included
-below, generated from [sheets].
+average.
 
-[![](https://i.imgur.com/I5ot7Eg.png)][sheetp]
-[![](https://i.imgur.com/l5ffxHA.png)][sheetp]
-[![](https://i.imgur.com/nVz1VAw.png)][sheetp]
-[![](https://i.imgur.com/jyvpYFd.png)][sheetp]
-[![](https://i.imgur.com/xQLNPnB.png)][sheetp]
-[![](https://i.imgur.com/YwLGvX6.png)][sheetp]
+> See
+> [code](https://github.com/ORG/communities-openmp-dynamic/tree/input-large),
+> [output](https://gist.github.com/wolfram77/a9f4b3a9c65ea26271ef062f19746bf6), or
+> [sheets].
 
-[input-large]: https://github.com/puzzlef/communities-openmp-dynamic/tree/input-large
+[![](https://i.imgur.com/HydmJjE.png)][sheets]
+[![](https://i.imgur.com/DImj54W.png)][sheets]
+[![](https://i.imgur.com/kp8201a.png)][sheets]
+[![](https://i.imgur.com/h6nBkj3.png)][sheets]
+[![](https://i.imgur.com/ylROvV3.png)][sheets]
+[![](https://i.imgur.com/DErQ7Vn.png)][sheets]
+
+[input-large]: https://github.com/ORG/communities-openmp-dynamic/tree/input-large
+[sheets]: https://docs.google.com/spreadsheets/d/1R96ZRfAMvc8JsZcSFiUz2A4NBuJYIQoWIkAa0otHVKc/edit?usp=sharing
 
 <br>
 
@@ -57,12 +62,12 @@ each algorithm was measured as the ratio of the time taken by the algorithm
 compared to the same algorithm running on one thread.
 
 Our findings suggest that **Hybrid Louvain-LPA** exhibited a speedup rate of
-`1.41x` than Louvain (`1.38x`) and LPA (`1.40x`). We observed a dip in speedup
+`1.46x` than Louvain (`1.31x`) and LPA (`1.44x`). We observed a dip in speedup
 when using 128 threads, likely due to hyper-threading effects (the system has 64
 cores). *Hybrid Louvain-LPA* demonstrated the good speedup on *social networks*,
 but did not scale well enough on *road networks*.
 
-[strong-scaling]: https://github.com/puzzlef/communities-openmp-dynamic/tree/strong-scaling
+[strong-scaling]: https://github.com/ORG/communities-openmp-dynamic/tree/strong-scaling
 
 <br>
 
@@ -80,7 +85,7 @@ Our results indicate that we need to rerun the static algorithm after `~1300`
 batch updates with *Dynamic Frontier* based *Louvain*, and after `~600` batch
 updates with *Dynamic Frontier* based *Hybrid Louvain-RAK*.
 
-[multi-batch]: https://github.com/puzzlef/communities-openmp-dynamic/tree/multi-batch
+[multi-batch]: https://github.com/ORG/communities-openmp-dynamic/tree/multi-batch
 
 <br>
 <br>
@@ -123,9 +128,4 @@ uncomment `./main.sh "--strong-scaling"`, and run the same as above.
 
 
 [![](https://i.imgur.com/xmxAIC5.jpg)](https://www.youtube.com/watch?v=R8gdUldwD0I)<br>
-
-
-[gist]: https://www.example.com
-[charts]: https://imgur.com/a/yp77sj3
-[sheets]: https://docs.google.com/spreadsheets/d/1R96ZRfAMvc8JsZcSFiUz2A4NBuJYIQoWIkAa0otHVKc/edit?usp=sharing
-[sheetp]: https://docs.google.com/spreadsheets/d/e/2PACX-1vRzLR815cVRcPYmdcROo1rJz7854Oo2sU40hOV3of9jCZQU3gLWNbZSp3RgQv3iRONPmnwI8Wa4VFLO/pubhtml
+[![ORG](https://img.shields.io/badge/org-ORG-green?logo=Org)](https://ORG.github.io)
