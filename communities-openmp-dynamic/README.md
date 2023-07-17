@@ -35,7 +35,7 @@ average.
 
 > See
 > [code](https://github.com/ORG/communities-openmp-dynamic/tree/input-large),
-> [output](https://gist.github.com/wolfram77/a9f4b3a9c65ea26271ef062f19746bf6), or
+> [output](https://gist.github.com/), or
 > [sheets].
 
 [![](https://i.imgur.com/HydmJjE.png)][sheets]
@@ -46,7 +46,7 @@ average.
 [![](https://i.imgur.com/DErQ7Vn.png)][sheets]
 
 [input-large]: https://github.com/ORG/communities-openmp-dynamic/tree/input-large
-[sheets]: https://docs.google.com/spreadsheets/d/1R96ZRfAMvc8JsZcSFiUz2A4NBuJYIQoWIkAa0otHVKc/edit?usp=sharing
+[sheets]: https://docs.google.com/spreadsheets/
 
 <br>
 

@@ -58,7 +58,7 @@ is the **fastest**, followed by *Naive-dynamic*, and finally *Dynamic*
 
 > See
 > [code](https://github.com/ORG/rak-communities-openmp-dynamic/tree/input-large),
-> [output](https://gist.github.com/wolfram77/ad7dd582d6e57c22c29ee4f24bc82797), or
+> [output](https://gist.github.com/), or
 > [sheets].
 
 [![](https://i.imgur.com/68Ox0yW.png)][sheets]
@@ -69,7 +69,7 @@ is the **fastest**, followed by *Naive-dynamic*, and finally *Dynamic*
 [![](https://i.imgur.com/i2yXEbn.png)][sheets]
 
 [input-large]: https://github.com/ORG/rak-communities-openmp-dynamic/tree/input-large
-[sheets]: https://docs.google.com/spreadsheets/d/1MG1NlpQ-etbwaENJwSjcq5eUTvsUphi2QfvYbjKnFss/edit?usp=sharing
+[sheets]: https://docs.google.com/spreadsheets/
 
 <br>
 

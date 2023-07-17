@@ -110,7 +110,7 @@ may be a bit better.
 
 > See
 > [code](https://github.com/ORG/louvain-communities-openmp-dynamic/tree/input-large),
-> [output](https://gist.github.com/wolfram77/adbef451db5bf46f1a7243349121a860), or
+> [output](https://gist.github.com/), or
 > [sheets].
 
 
@@ -147,7 +147,7 @@ With **Dynamic Frontier**, most time is spent doing this *other work*, followed 
 [![](https://i.imgur.com/5eSzJzf.png)][sheets]
 [![](https://i.imgur.com/xSREmHM.png)][sheets]
 
-[sheets]: https://docs.google.com/spreadsheets/d/1F6Z-lWNDYynm6m2PTsIN_nxMu8Y9CrkIQagCU0Nr2LU/edit?usp=sharing
+[sheets]: https://docs.google.com/spreadsheets/
 
 <br>
 
