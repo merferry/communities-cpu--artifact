@@ -7,7 +7,7 @@ printf "" > "$out"
 # Download program
 if [[ "$DOWNLOAD" != "0" ]]; then
   rm -rf $src
-  git clone https://github.com/ORG/$src
+  git clone https://github.com/author1/$src
   cd $src
 fi
 
@@ -15,7 +15,7 @@ fi
 : "${TYPE:=float}"
 : "${MAX_THREADS:=64}"
 : "${REPEAT_BATCH:=5}"
-: "${REPEAT_METHOD:=1}"
+: "${REPEAT_METHOD:=5}"
 # Parameter sweep for batch (randomly generated)
 : "${BATCH_UNIT:=%}"
 : "${BATCH_LENGTH:=1}"
@@ -52,9 +52,8 @@ DEFINES=(""
 
 # Run
 g++ ${DEFINES[*]} -std=c++17 -O3 -fopenmp main.cxx
-# stdbuf --output=L ./a.out ~/Data/soc-Epinions1.mtx   0 0 2>&1 | tee -a "$out"
+# stdbuf --output=L ./a.out ~/Data/web-Stanford.mtx    0 0 2>&1 | tee -a "$out"
 stdbuf --output=L ./a.out ~/Data/indochina-2004.mtx  0 0 2>&1 | tee -a "$out"
-stdbuf --output=L ./a.out ~/Data/uk-2002.mtx         0 0 2>&1 | tee -a "$out"
 stdbuf --output=L ./a.out ~/Data/arabic-2005.mtx     0 0 2>&1 | tee -a "$out"
 stdbuf --output=L ./a.out ~/Data/uk-2005.mtx         0 0 2>&1 | tee -a "$out"
 stdbuf --output=L ./a.out ~/Data/webbase-2001.mtx    0 0 2>&1 | tee -a "$out"

@@ -1,5 +1,5 @@
 set term pdf
-set terminal pdf size 4in,3.7in
+set terminal pdf size 4in,3in
 set output 'louvain-am.pdf'
 
 
@@ -34,15 +34,16 @@ set style line 14 linewidth 2 linetype 1 pointtype 2 dashtype 2
 
 ## Draw plot
 plot 'louvain-am.csv' \
-       using 4:($5 /1000)                    title 'Static Louvain'              linestyle 1 with linespoints, \
-    '' using 4:($6 /1000)                    title 'Naive-dynamic Louvain'       linestyle 2 with linespoints, \
-    '' using 4:((0.001*$5 + 0.999*$7 )/1000) title 'Dynamic Δ-screening Louvain' linestyle 3 with linespoints, \
-    '' using 4:((0.001*$5 + 0.999*$8 )/1000) title 'Dynamic Frontier Louvain'    linestyle 4 with linespoints, \
+       using 4:($5 /1000) title 'Static_L' linestyle 1 with linespoints, \
+    '' using 4:($7 /1000) title 'P-DS_L'   linestyle 3 with linespoints, \
+    '' using 4:($8 /1000) title 'P-DF_L'   linestyle 4 with linespoints, \
     '' using 4:9  title '' linestyle 11 with linespoints axes x1y2, \
-    '' using 4:10 title '' linestyle 12 with linespoints axes x1y2, \
     '' using 4:11 title '' linestyle 13 with linespoints axes x1y2, \
     '' using 4:12 title '' linestyle 14 with linespoints axes x1y2, \
-    '' using 4:((0.001*$5 + 0.999*$8 )/1000):(sprintf("%.2f", $6/(0.001*$5 + 0.999*$8 ))) with labels notitle offset character 0,character -1
+    '' using 4:($5 /1000):($4< 0.1? sprintf("%.2f", $5/$8 ) : "") with labels notitle offset character 0,character -0.7, \
+    '' using 4:($5 /1000):($4>=0.1? sprintf("%.2f", $5/$8 ) : "") with labels notitle offset character -3,character 0, \
+    '' using 4:($7 /1000):($4< 0.1? sprintf("%.2f", $7/$8 ) : "") with labels notitle offset character 0,character -0.7, \
+    '' using 4:($7 /1000):($4>=0.1? sprintf("%.2f", $7/$8 ) : "") with labels notitle offset character -3,character 0
 
 
 
@@ -60,3 +61,7 @@ plot 'louvain-am.csv' \
 # 10. lounai-m
 # 11. loudel-m
 # 12. loufro-m
+# 13. lousta-aff
+# 14. lounai-aff
+# 15. loudel-aff
+# 16. loufro-aff

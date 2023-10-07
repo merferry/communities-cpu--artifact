@@ -4,10 +4,10 @@ code for *three experiments* and the source code for *generating plots* in four
 separate directories.
 
 1. `louvain-communities-openmp-dynamic/` contains the source code for the
-   experiment which compares the performance of *Static*, *Naive-dynamic*,
+   experiment which compares the performance of *Static*
    *Dynamic Delta-screening*, and *Dynamic Frontier* based *Louvain*.
 2. `rak-communities-openmp-dynamic/` contains the source code for the experiment
-   which compares the performance of *Static*, *Naive-dynamic*, *Dynamic*
+   which compares the performance of *Static*, *Dynamic*
    *Delta-screening*, and *Dynamic Frontier* based *LPA* (aka *RAK*).
 3. `communities-openmp-dynamic/` contains the source code for the experiment
    which compares the performance of *Dynamic Frontier* based *Louvain*, *LPA*,
@@ -42,11 +42,6 @@ directories and download the input dataset. The graphs in the **input dataset**
 are as follows:
 
 ```
-indochina-2004.mtx
-uk-2002.mtx
-arabic-2005.mtx
-uk-2005.mtx
-webbase-2001.mtx
 it-2004.mtx
 sk-2005.mtx
 com-LiveJournal.mtx

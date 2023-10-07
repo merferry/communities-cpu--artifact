@@ -38,13 +38,8 @@ if [ !  -d "$gra/GAP" ]; then
 fi
 if [ !  -d "$gra/LAW" ]; then
   mkdir -p "$gra/LAW"
-  fetch "$gra/LAW" LAW/webbase-2001
-  fetch "$gra/LAW" LAW/uk-2002
-  fetch "$gra/LAW" LAW/indochina-2004
   fetch "$gra/LAW" LAW/it-2004
-  fetch "$gra/LAW" LAW/arabic-2005
   fetch "$gra/LAW" LAW/sk-2005
-  fetch "$gra/LAW" LAW/uk-2005
 fi
 if [ !  -d "$gra/SNAP" ]; then
   mkdir -p "$gra/SNAP"
