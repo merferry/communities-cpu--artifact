@@ -13,7 +13,7 @@ separate directories.
    which compares the performance of *Dynamic Frontier* based *Louvain*, *LPA*,
    and *Hybrid Louvain-LPA*. It also includes the script (and steps) to run the
    strong scaling experiment.
-4. `gnuplot-scripts-communities-cpu/` contains the source code for generating
+4. `scripts-gnuplot/` contains the source code for generating
    the plots for the experiments.
 
 <br>

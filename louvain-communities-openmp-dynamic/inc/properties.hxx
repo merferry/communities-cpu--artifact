@@ -248,7 +248,7 @@ inline double modularityByOmp(const G& x, FC fc, double M, double R=1) {
  * @param M total weight of "undirected" graph (1/2 of directed graph)
  * @param R resolution (0, 1]
  * @returns delta-modularity [-0.5, 1]
- * @see https://gist.github.com/author1/a3c95cd94a38a100f9b075594a823928
+ * @see https://gist.github.com/wolfram77/a3c95cd94a38a100f9b075594a823928
  */
 inline double deltaModularity(double vcout, double vdout, double vtot, double ctot, double dtot, double M, double R=1) {
   ASSERT(vcout>=0 && vdout>=0 && vtot>=0 && ctot>=0 && dtot>=0 && M>0 && R>0);
@@ -391,7 +391,7 @@ inline vector<char> communitiesDisconnectedOmp(const G& x, const vector<K>& vcom
       auto ft = [&](auto v, auto d) { return vcom[v]==c; };
       auto fp = [&](auto v, auto d) { ++reached; };
       us[t].clear(); vs[t].clear(); us[t].push_back(u);
-      bfsVisitedForEachW(vis, us[t], vs[t], x, ft, fp);
+      bfsVisitedForEachU(vis, us[t], vs[t], x, ft, fp);
       if (reached < coms[c]) a[c] = 1;
       coms[c] = 0;
     }

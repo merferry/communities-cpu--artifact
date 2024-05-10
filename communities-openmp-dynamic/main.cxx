@@ -144,7 +144,6 @@ void runExperiment(const G& x) {
   default_random_engine rnd(dev());
   int repeat  = REPEAT_METHOD;
   int retries = 5;
-  vector<K> *init = nullptr;
   double M = edgeWeightOmp(x)/2;
   // Follow a specific result logging format, which can be easily parsed later.
   auto glog = [&](const auto& ans, const char *technique, int numThreads, const auto& y, auto M, auto deletionsf, auto insertionsf) {
@@ -157,9 +156,9 @@ void runExperiment(const G& x) {
     );
   };
   // Get community memberships on original graph (static).
-  auto b0 = louvainStaticOmp(x, init);
+  auto b0 = louvainStaticOmp(x);
   glog(b0, "louvainStaticOmpOriginal", MAX_THREADS, x, M, 0.0, 0.0);
-  auto f0 = rakStaticOmp(x, init);
+  auto f0 = rakStaticOmp(x);
   glog(f0, "rakStaticOmpOriginal", MAX_THREADS, x, M, 0.0, 0.0);
   #if BATCH_LENGTH>1
   vector<K> B2, F2, F3;
@@ -189,19 +188,19 @@ void runExperiment(const G& x) {
         glog(ans, technique, numThreads, y, M, deletionsf, insertionsf);
       };
       // Find static Louvain.
-      auto b1 = louvainStaticOmp(y, init, {repeat});
+      auto b1 = louvainStaticOmp(y, {repeat});
       flog(b1, "louvainStaticOmp");
       // Find frontier based dynamic Louvain.
-      auto b2 = louvainDynamicFrontierOmp(y, deletions, insertions, &B2, &VW, &CW, {repeat});
+      auto b2 = louvainDynamicFrontierOmp(y, deletions, insertions, B2, VW, CW, {repeat});
       flog(b2, "louvainDynamicFrontierOmp");
       // Find static RAK (strict).
-      auto f1 = rakStaticOmp(y, init, {repeat});
+      auto f1 = rakStaticOmp(y, {repeat});
       flog(f1, "rakStaticOmp");
       // Find frontier based dynamic RAK (strict).
-      auto f2 = rakDynamicFrontierOmp(y, deletions, insertions, &F2, {repeat});
+      auto f2 = rakDynamicFrontierOmp(y, deletions, insertions, F2, {repeat});
       flog(f2, "rakDynamicFrontierOmp");
       // Find frontier based dynamic Hybrid Louvain-RAK (strict).
-      auto f3 = rakDynamicFrontierOmp(y, deletions, insertions, &F3, {repeat});
+      auto f3 = rakDynamicFrontierOmp(y, deletions, insertions, F3, {repeat});
       flog(f3, "louvainRakDynamicFrontierOmp");
       #if BATCH_LENGTH>1
       B2 = b2.membership;

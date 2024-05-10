@@ -144,7 +144,6 @@ void runExperiment(const G& x) {
   default_random_engine rnd(dev());
   int repeat  = REPEAT_METHOD;
   int retries = 5;
-  vector<K> *init = nullptr;
   double M = edgeWeightOmp(x)/2;
   // Follow a specific result logging format, which can be easily parsed later.
   auto glog = [&](const auto& ans, const char *technique, int numThreads, const auto& y, auto M, auto deletionsf, auto insertionsf) {
@@ -157,7 +156,7 @@ void runExperiment(const G& x) {
     );
   };
   // Get community memberships on original graph (static).
-  auto d0 = rakStaticOmp(x, init, {5});
+  auto d0 = rakStaticOmp(x, {5});
   glog(d0, "rakStaticOmpOriginal", MAX_THREADS, x, M, 0.0, 0.0);
   #if BATCH_LENGTH>1
   vector<K> D2, D3, D4;
@@ -182,16 +181,16 @@ void runExperiment(const G& x) {
         glog(ans, technique, numThreads, y, M, deletionsf, insertionsf);
       };
       // Find static RAK (strict).
-      auto d1 = rakStaticOmp(y, init, {repeat});
+      auto d1 = rakStaticOmp(y, {repeat});
       flog(d1, "rakStaticOmp");
       // Find naive-dynamic RAK (strict).
-      auto d2 = rakStaticOmp(y, &D2, {repeat});
+      auto d2 = rakNaiveDynamicOmp(y, D2, {repeat});
       flog(d2, "rakNaiveDynamicOmp");
       // Find delta-screening based dynamic RAK (strict).
-      auto d3 = rakDynamicDeltaScreeningOmp(y, deletions, insertions, &D3, {repeat});
+      auto d3 = rakDynamicDeltaScreeningOmp(y, deletions, insertions, D3, {repeat});
       flog(d3, "rakDynamicDeltaScreeningOmp");
       // Find frontier based dynamic RAK (strict).
-      auto d4 = rakDynamicFrontierOmp(y, deletions, insertions, &D4, {repeat});
+      auto d4 = rakDynamicFrontierOmp(y, deletions, insertions, D4, {repeat});
       flog(d4, "rakDynamicFrontierOmp");
       #if BATCH_LENGTH>1
       D2 = d2.membership;

@@ -5,7 +5,7 @@ ulimit -s unlimited
 # Download program
 if [[ "$DOWNLOAD" != "0" ]]; then
   rm -rf $src
-  git clone https://github.com/author1/$src
+  git clone https://github.com/puzzlef/$src
   cd $src
 fi
 
@@ -32,6 +32,3 @@ export BATCH_DELETIONS_END="0.0128"
 export BATCH_DELETIONS_STEP="*=2"
 export NUM_THREADS_MODE="with-batch"
 # ./main.sh "--weak-scaling"
-
-# Signal completion
-curl -X POST "https://maker.ifttt.com/trigger/author1/with/key/${IFTTT_KEY}?value1=$src"
